@@ -21,6 +21,10 @@
         .sort-icon.desc:before {
             content: "\f0dd";
         }
+
+        .show-edit-form {
+            display: block;
+        }
     </style>
 </head>
 
@@ -158,7 +162,7 @@
                     ID
                 </label>
                 <div class="col-sm-8">
-                    <input type="text" class="form-control" id="id" name="id" readonly>
+                    <input type="text" class="form-control" id="id2" name="id">
                 </div>
             </div>
             <div class="row mb-3">
@@ -166,7 +170,7 @@
                     String
                 </label>
                 <div class="col-sm-8">
-                    <input type="text" class="form-control" id="string" name="string">
+                    <input type="text" class="form-control" id="string2" name="string">
                 </div>
             </div>
             <div class="row mb-3">
@@ -174,7 +178,7 @@
                     Integer
                 </label>
                 <div class="col-sm-8">
-                    <input type="text" class="form-control" id="integer" name="integer">
+                    <input type="text" class="form-control" id="integer2" name="integer">
                 </div>
             </div>
             <div class="row mb-3">
@@ -182,7 +186,7 @@
                     Float
                 </label>
                 <div class="col-sm-8">
-                    <input type="text" class="form-control" id="float" name="float">
+                    <input type="text" class="form-control" id="float2" name="float">
                 </div>
             </div>
             <div class="row mb-3">
@@ -190,7 +194,7 @@
                     Date
                 </label>
                 <div class="col-sm-4">
-                    <input type="date" class="form-control" id="startDate" name="startDate">
+                    <input type="date" class="form-control" id="startDate2" name="startDate">
                 </div>
             </div>
             <div class="row mb-3">
@@ -198,15 +202,14 @@
                     Boolean
                 </label>
                 <div class="col-sm-8">
-                    <select name="boolean" id="boolean" class="form-select">
+                    <select name="boolean" id="boolean2" class="form-select">
                         <option>Choose the boolean</option>
                         <option value="true">True</option>
                         <option value="false">False</option>
                     </select>
                 </div>
             </div>
-            <!-- <button class="btn btn-primary">Search</button> -->
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-info">Save</button>
             <a onclick="closeEdit()" class="btn btn-secondary">Close</a>
         </form>
     </div>
@@ -354,49 +357,47 @@
                 console.log(error);
             }
         }
-        async function updateData(id) {
+        async function updateData(event,id3) {
+            event.preventDefault(); // Prevent the form from submitting
+
+            // Retrieve the values from the form fields
+            const number = document.getElementById('id2').value;
+            const string = document.getElementById('string2').value;
+            const integer = document.getElementById('integer2').value;
+            const float = document.getElementById('float2').value;
+            const date = document.getElementById('startDate2').value;
+            const boolean = document.getElementById('boolean2').value;
+
+            // Make an API request to update the data
             try {
-                const number = document.getElementById('id').value; // Assuming 'number' is the ID of the input field for the number value
-                const string = document.getElementById('string').value;
-                const integer = document.getElementById('integer').value;
-                const float = document.getElementById('float').value;
-                const date = document.getElementById('startDate').value;
-                const boolean = document.getElementById('boolean').value;
-                const data = {
-                    number: number,
-                    string: string,
-                    integer: integer,
-                    float: float,
-                    date: date,
-                    boolean: boolean
-                }
-                if (!number || !string || !integer || !float || !date || !boolean) {
-                    alert('Please,Insert the data')
-                    return
-                }
-                const response = await fetch(`http://localhost:3000/data/${id}`, {
+                const response = await fetch(`http://localhost:3000/data/${id3}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
-                })
+                    body: JSON.stringify({
+                        number,
+                        string,
+                        integer,
+                        float,
+                        date,
+                        boolean : boolean,
+                    }),
+                });
+
                 if (response.ok) {
                     const result = await response.json();
-                    console.log("Success: ", result)
-                    // Clear the input fields
-                    document.getElementById('id').value = '';
-                    document.getElementById('string').value = '';
-                    document.getElementById('integer').value = '';
-                    document.getElementById('float').value = '';
-                    document.getElementById('startDate').value = '';
-                    document.getElementById('boolean').value = '';
-                    readData()
+                    console.log("Success:", result);
+                    closeEdit(); // Close the edit form
+                    readData(); // Refresh data after successful update
+                } else {
+                    console.error('Error updating data:', response.status);
                 }
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
         }
+
         async function deleteData(id) {
             try {
                 const response = await fetch(`http://localhost:3000/data/${id}`, {
@@ -419,6 +420,7 @@
                 console.log(error);
             }
         }
+        let id3;
         function displayData(data, sortby, sortorder) {
             let html = "";
             data.forEach((item, index) => {
@@ -431,11 +433,11 @@
             <td>${item.date}</td>
             <td>${item.boolean}</td>
             <td>
-                <button class="btn btn-success btn-sm" onclick="updateData('${item._id}')">Edit</button>
+                <button class="btn btn-success btn-sm" onclick="showEdit('${item._id}')">Edit</button>
                 <button class="btn btn-danger btn-sm" onclick="deleteData('${item._id}')">Hapus</button>
-                <button class="btn btn-primary btn-sm" onclick="showEdit('${item._id}')">Show</button>
             </td>
-        </tr>`;
+        </tr>`
+        id3 = item._id;
             });
             document.getElementById('data-body').innerHTML = html;
         }
@@ -536,13 +538,12 @@
             try {
                 const response = await fetch(`http://localhost:3000/data/edit/${id}`)
                 const data = await response.json();
-
-                form.querySelector("#id").value = data[0].number;
-                form.querySelector("#string").value = data[0].string;
-                form.querySelector("#integer").value = data[0].integer;
-                form.querySelector("#float").value = data[0].float;
-                form.querySelector("#startDate").value = moment(new Date(data[0].date)).format('YYYY-MM-DD');
-                form.querySelector("#boolean").value = data[0].boolean
+                form.querySelector("#id2").value = data[0].number;
+                form.querySelector("#string2").value = data[0].string;
+                form.querySelector("#integer2").value = data[0].integer;
+                form.querySelector("#float2").value = data[0].float;
+                form.querySelector("#startDate2").value = moment(new Date(data[0].date)).format('YYYY-MM-DD');
+                form.querySelector("#boolean2").value = data[0].boolean
             } catch (error) {
                 console.log('Error : ', error)
             }
@@ -551,6 +552,13 @@
         function closeEdit() {
             document.getElementById("edit-form").style.display = 'none'
         }
+        document
+        .getElementById("edit-form")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+         
+          updateData(event,id3);
+        });
         readData(params);
     </script>
 </body>

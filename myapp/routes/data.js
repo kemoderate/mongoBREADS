@@ -6,7 +6,7 @@ const ObjectID = require('mongodb').ObjectId;
 router.get('/', async function (req, res, next) {
     try {
         const params = {};
-        let sortby = req.query.sortby || 'number';
+        let sortby = req.query.sortby || '_id';
         let sortorder = req.query.sortorder || 'asc';
 
         if (req.query.checkId && req.query.id) {
@@ -90,7 +90,7 @@ router.get('/edit/:id', async (req, res, next) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { number, string, integer, float, date } = req.body;
+        const { number, string, integer, float, date,boolean } = req.body;
         const db = req.app.locals.db;
         const collection = db.collection('data');
         const result = await collection.updateMany({ _id: new ObjectID(id) }, {
@@ -99,7 +99,8 @@ router.put('/:id', async (req, res) => {
                 string: string,
                 integer: parseInt(integer),
                 float: parseFloat(float),
-                date: date
+                date: date,
+                boolean: boolean === "true",
             }
         });
         res.status(201).json(result);

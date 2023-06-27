@@ -8,10 +8,10 @@ var MongoClient = require('mongodb').MongoClient;
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var datasRouter = require('./routes/data');
-var JquerysRouter = require('./routes/index');
+
 
 // MongoDB connection string
-const mongoURL = 'mongodb://localhost:27017/';
+const mongoURL = 'mongodb://localhost:27017/breadsdb';
 
 
 var app = express();
@@ -47,7 +47,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/data', datasRouter);
-app.use('/Jquery',JquerysRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

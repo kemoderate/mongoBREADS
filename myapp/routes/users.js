@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const { MongoClient } = require('mongodb');
 // Connection URL
-const mongoURL = 'mongodb://localhost:27017/';
+const mongoURL = 'mongodb://localhost:27017/breadsdb';
 
 /* GET users listing. */
 router.get('/', async (req, res, next) =>{
